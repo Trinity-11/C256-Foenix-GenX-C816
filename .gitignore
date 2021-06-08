@@ -42,3 +42,5 @@ build/c256_diskio.obj
 build/c256_diskio.lst
 build/block.obj
 build/block.lst
+build/pata.obj
+build/pata.lst

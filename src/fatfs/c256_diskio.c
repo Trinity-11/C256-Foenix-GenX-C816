@@ -74,8 +74,6 @@ DRESULT disk_read (
 		result = bdev_read(pdrv, sector, buff, 512);
 		if (result < 0) {
 			LOG("disk_read error: ");
-			txt_prhex_w(0, result);
-			txt_raw_putc(0, '\r');
 			return RES_PARERR;
 		} else {
 			sector += result;
@@ -101,16 +99,21 @@ DRESULT disk_write (
 )
 {
 	DRESULT res;
+	int i;
 	int result;
 
 	TRACE("disk_write");
 
-	result = bdev_write(pdrv, sector, buff, count);
-	if (result < 0) {
-		return RES_PARERR;
-	} else {
-		return RES_OK;
+	for (i = 0; i < count; i++) {
+		result = bdev_write(pdrv, sector, buff, 512);
+		if (result < 0) {
+			return RES_PARERR;
+		} else {
+			sector += result;
+		}
 	}
+
+	return RES_OK;
 }
 
 #endif

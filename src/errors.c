@@ -5,6 +5,7 @@
 #include "errors.h"
 
 char * g_error_names[] = {
+    "Out of memory",
     "Device number is bad",
     "Operation timed out",
     "Device could not be initialized",

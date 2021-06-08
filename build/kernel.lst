@@ -1,4 +1,4 @@
-  Sun Jun  6 2021 20:39                                                Page 1
+  Tue Jun  8 2021 16:32                                                Page 1
 
 
                      ***************************************
@@ -31,369 +31,848 @@
     22                        ;#include "dev/channel/ps2.h"
     23                        ;#include "dev/block/block.h"
     24                        ;#include "dev/block/sdc.h"
-    25                        ;#include "fatfs/ff.h"
-    26                        ;#include "cli/cli.h"
-    27                        ;
-    28                        ;//
-    29                        ;// Declare the heap
-    30                        ;//
-    31                        ;
-    32                        ;void *heap_start = (void * )MIN_HEAP;
-    33                        	data
-    34                        	xdef	~~heap_start
-    35                        ~~heap_start:
-    36 00:0000: 00 00 01 00  	dl	$10000
-    37 00:0004:              	ends
-    38                        ;void *heap_end = (void * )MAX_HEAP;
-    39                        	data
-    40                        	xdef	~~heap_end
-    41                        ~~heap_end:
-    42 00:0004: FF FF 36 00  	dl	$36FFFF
-    43 00:0008:              	ends
-    44                        ;
-    45                        ;void k_prints(char * s) {
-    46                        	code
-    47                        	xdef	~~k_prints
-    48                        	func
-    49                        ~~k_prints:
-    50                        	longa	on
-    51                        	longi	on
-    52 00:0000: 3B           	tsc
-  Sun Jun  6 2021 20:39                                                Page 2
+    25                        ;#include "dev/block/pata.h"
+    26                        ;#include "fatfs/ff.h"
+    27                        ;#include "cli/cli.h"
+    28                        ;
+    29                        ;//
+    30                        ;// Declare the heap
+    31                        ;//
+    32                        ;
+    33                        ;void *heap_start = (void * )MIN_HEAP;
+    34                        	data
+    35                        	xdef	~~heap_start
+    36                        ~~heap_start:
+    37 00:0000: 00 00 01 00  	dl	$10000
+    38 00:0004:              	ends
+    39                        ;void *heap_end = (void * )MAX_HEAP;
+    40                        	data
+    41                        	xdef	~~heap_end
+    42                        ~~heap_end:
+    43 00:0004: FF FF 36 00  	dl	$36FFFF
+    44 00:0008:              	ends
+    45                        ;
+    46                        ;void k_prints(char * s) {
+    47                        	code
+    48                        	xdef	~~k_prints
+    49                        	func
+    50                        ~~k_prints:
+    51                        	longa	on
+    52                        	longi	on
+  Tue Jun  8 2021 16:32                                                Page 2
 
 
-    53 00:0001: 38           	sec
-    54 00:0002: E9 00 00     	sbc	#L2
-    55 00:0005: 1B           	tcs
-    56 00:0006: 0B           	phd
-    57 00:0007: 5B           	tcd
-    58             00000004   s_0	set	4
-    59                        ;    chan_write(CDEV_CONSOLE, s, strlen(s));
-    60 00:0008: D4 06        	pei	<L2+s_0+2
-    61 00:000A: D4 04        	pei	<L2+s_0
-    62 00:000C: 22 xx xx xx  	jsl	~~strlen
-    63 00:0010: 48           	pha
-    64 00:0011: D4 06        	pei	<L2+s_0+2
-    65 00:0013: D4 04        	pei	<L2+s_0
-    66 00:0015: F4 00 00     	pea	#<$0
-    67 00:0018: 22 xx xx xx  	jsl	~~chan_write
-    68                        ;}
-    69                        L4:
-    70 00:001C: A5 02        	lda	<L2+2
-    71 00:001E: 85 06        	sta	<L2+2+4
-    72 00:0020: A5 01        	lda	<L2+1
-    73 00:0022: 85 05        	sta	<L2+1+4
-    74 00:0024: 2B           	pld
-    75 00:0025: 3B           	tsc
-    76 00:0026: 18           	clc
-    77 00:0027: 69 04 00     	adc	#L2+4
-    78 00:002A: 1B           	tcs
-    79 00:002B: 6B           	rtl
-    80             00000000   L2	equ	0
-    81             00000001   L3	equ	1
-    82                        	ends
-    83                        	efunc
-    84                        ;
-    85                        ;//
-    86                        ;// Initialize all the hardware on the Foenix
-    87                        ;//
-    88                        ;void fnx_init() {
-    89                        	code
-    90                        	xdef	~~fnx_init
-    91                        	func
-    92                        ~~fnx_init:
-    93                        	longa	on
-    94                        	longi	on
-    95 00:002C: 3B           	tsc
-    96 00:002D: 38           	sec
-    97 00:002E: E9 02 00     	sbc	#L5
-    98 00:0031: 1B           	tcs
-    99 00:0032: 0B           	phd
-   100 00:0033: 5B           	tcd
-   101                        ;    short res;
-   102                        ;
-   103                        ;    irq_init();
-   104             00000000   res_1	set	0
-   105 00:0034: 22 xx xx xx  	jsl	~~irq_init
-   106                        ;    txt_scr_init();
-   107 00:0038: 22 xx xx xx  	jsl	~~txt_scr_init
-   108                        ;
-   109                        ;    TRACE("fnx_init");
-   110                        ;
-  Sun Jun  6 2021 20:39                                                Page 3
+    53 00:0000: 3B           	tsc
+    54 00:0001: 38           	sec
+    55 00:0002: E9 00 00     	sbc	#L2
+    56 00:0005: 1B           	tcs
+    57 00:0006: 0B           	phd
+    58 00:0007: 5B           	tcd
+    59             00000004   s_0	set	4
+    60                        ;    chan_write(CDEV_CONSOLE, s, strlen(s));
+    61 00:0008: D4 06        	pei	<L2+s_0+2
+    62 00:000A: D4 04        	pei	<L2+s_0
+    63 00:000C: 22 xx xx xx  	jsl	~~strlen
+    64 00:0010: 48           	pha
+    65 00:0011: D4 06        	pei	<L2+s_0+2
+    66 00:0013: D4 04        	pei	<L2+s_0
+    67 00:0015: F4 00 00     	pea	#<$0
+    68 00:0018: 22 xx xx xx  	jsl	~~chan_write
+    69                        ;}
+    70                        L4:
+    71 00:001C: A5 02        	lda	<L2+2
+    72 00:001E: 85 06        	sta	<L2+2+4
+    73 00:0020: A5 01        	lda	<L2+1
+    74 00:0022: 85 05        	sta	<L2+1+4
+    75 00:0024: 2B           	pld
+    76 00:0025: 3B           	tsc
+    77 00:0026: 18           	clc
+    78 00:0027: 69 04 00     	adc	#L2+4
+    79 00:002A: 1B           	tcs
+    80 00:002B: 6B           	rtl
+    81             00000000   L2	equ	0
+    82             00000001   L3	equ	1
+    83                        	ends
+    84                        	efunc
+    85                        ;
+    86                        ;void ltoa(long x, char * text) {
+    87                        	code
+    88                        	xdef	~~ltoa
+    89                        	func
+    90                        ~~ltoa:
+    91                        	longa	on
+    92                        	longi	on
+    93 00:002C: 3B           	tsc
+    94 00:002D: 38           	sec
+    95 00:002E: E9 3E 00     	sbc	#L5
+    96 00:0031: 1B           	tcs
+    97 00:0032: 0B           	phd
+    98 00:0033: 5B           	tcd
+    99             00000004   x_0	set	4
+   100             00000008   text_0	set	8
+   101                        ;    char buffer[40];
+   102                        ;    short digit;
+   103                        ;    long running;
+   104                        ;    short i;
+   105                        ;    short is_negative = 0;
+   106                        ;
+   107                        ;    if (x < 0) {
+   108             00000000   buffer_1	set	0
+   109             00000028   digit_1	set	40
+   110             0000002A   running_1	set	42
+  Tue Jun  8 2021 16:32                                                Page 3
 
 
-   111                        ;    clk_init();
-   112 00:003C: 22 xx xx xx  	jsl	~~clk_init
-   113                        ;    codec_init();
-   114 00:0040: 22 xx xx xx  	jsl	~~codec_init
-   115                        ;    psg_init();
-   116 00:0044: 22 xx xx xx  	jsl	~~psg_init
-   117                        ;    sid_init();
-   118 00:0048: 22 xx xx xx  	jsl	~~sid_init
-   119                        ;    bdev_init_system();
-   120 00:004C: 22 xx xx xx  	jsl	~~bdev_init_system
-   121                        ;
-   122                        ;    res = ps2_init();
-   123 00:0050: 22 xx xx xx  	jsl	~~ps2_init
-   124 00:0054: 85 01        	sta	<L6+res_1
-   125                        ;    if (res != 0) {
-   126 00:0056: A5 01        	lda	<L6+res_1
-   127 00:0058: D0 03        	bne	L7
-   128 00:005A: 82 1D 00     	brl	L10001
-   129                        L7:
-   130                        ;        k_prints("Could not initialize keyboard: 
-                    ");
-   131 00:005D: F4 xx xx     	pea	#^L1
-   132 00:0060: F4 xx xx     	pea	#<L1
-   133 00:0063: 22 xx xx xx  	jsl	~~k_prints
-   134                        ;        txt_prhex_w(0, res);
-   135 00:0067: D4 01        	pei	<L6+res_1
-   136 00:0069: F4 00 00     	pea	#<$0
-   137 00:006C: 22 xx xx xx  	jsl	~~txt_prhex_w
-   138                        ;        irq_disable(IRQ08_KBD);
-   139 00:0070: F4 08 00     	pea	#<$8
-   140 00:0073: 22 xx xx xx  	jsl	~~irq_disable
-   141                        ;
-   142                        ;        while (1) ;
-   143                        L10002:
-   144 00:0077: 82 FD FF     	brl	L10002
-   145                        ;    }
-   146                        ;
-   147                        ;    res = con_install();
-   148                        L10001:
-   149 00:007A: 22 xx xx xx  	jsl	~~con_install
-   150 00:007E: 85 01        	sta	<L6+res_1
-   151                        ;    if (res != 0) {
-   152 00:0080: A5 01        	lda	<L6+res_1
-   153 00:0082: D0 03        	bne	L8
-   154 00:0084: 82 16 00     	brl	L10004
+   111             0000002E   i_1	set	46
+   112             00000030   is_negative_1	set	48
+   113 00:0034: 64 3D        	stz	<L6+is_negative_1
+   114 00:0036: A5 44        	lda	<L5+x_0+2
+   115 00:0038: 30 03        	bmi	L7
+   116 00:003A: 82 17 00     	brl	L10001
+   117                        L7:
+   118                        ;        is_negative = 1;
+   119 00:003D: A9 01 00     	lda	#$1
+   120 00:0040: 85 3D        	sta	<L6+is_negative_1
+   121                        ;        running = -x;
+   122 00:0042: 38           	sec
+   123 00:0043: A9 00 00     	lda	#$0
+   124 00:0046: E5 42        	sbc	<L5+x_0
+   125 00:0048: 85 37        	sta	<L6+running_1
+   126 00:004A: A9 00 00     	lda	#$0
+   127 00:004D: E5 44        	sbc	<L5+x_0+2
+   128 00:004F: 85 39        	sta	<L6+running_1+2
+   129                        ;    } else {
+   130 00:0051: 82 08 00     	brl	L10002
+   131                        L10001:
+   132                        ;        running = x;
+   133 00:0054: A5 42        	lda	<L5+x_0
+   134 00:0056: 85 37        	sta	<L6+running_1
+   135 00:0058: A5 44        	lda	<L5+x_0+2
+   136 00:005A: 85 39        	sta	<L6+running_1+2
+   137                        ;    }
+   138                        L10002:
+   139                        ;
+   140                        ;    buffer[39] = 0;
+   141 00:005C: E2 20        	sep	#$20
+   142                        	longa	off
+   143 00:005E: 64 34        	stz	<L6+buffer_1+39
+   144 00:0060: C2 20        	rep	#$20
+   145                        	longa	on
+   146                        ;    for (i = 38; i > 0; ) {
+   147 00:0062: A9 26 00     	lda	#$26
+   148 00:0065: 85 3B        	sta	<L6+i_1
+   149                        L10003:
+   150 00:0067: 38           	sec
+   151 00:0068: A9 00 00     	lda	#$0
+   152 00:006B: E5 3B        	sbc	<L6+i_1
+   153 00:006D: 70 03        	bvs	L8
+   154 00:006F: 49 00 80     	eor	#$8000
    155                        L8:
-   156                        ;        k_prints("Could not install the console d
+   156 00:0072: 10 03        	bpl	L9
+   157 00:0074: 82 67 00     	brl	L10004
+   158                        L9:
+   159                        ;        digit = running % 10;
+   160 00:0077: F4 00 00     	pea	#^$a
+   161 00:007A: F4 0A 00     	pea	#<$a
+   162 00:007D: D4 39        	pei	<L6+running_1+2
+   163 00:007F: D4 37        	pei	<L6+running_1
+   164                        	xref	~~~lmod
+   165 00:0081: 22 xx xx xx  	jsl	~~~lmod
+   166 00:0085: 85 01        	sta	<R0
+   167 00:0087: 86 03        	stx	<R0+2
+   168 00:0089: A5 01        	lda	<R0
+  Tue Jun  8 2021 16:32                                                Page 4
+
+
+   169 00:008B: 85 35        	sta	<L6+digit_1
+   170                        ;        running = running / 10l;
+   171 00:008D: F4 00 00     	pea	#^$a
+   172 00:0090: F4 0A 00     	pea	#<$a
+   173 00:0093: D4 39        	pei	<L6+running_1+2
+   174 00:0095: D4 37        	pei	<L6+running_1
+   175                        	xref	~~~ldiv
+   176 00:0097: 22 xx xx xx  	jsl	~~~ldiv
+   177 00:009B: 85 37        	sta	<L6+running_1
+   178 00:009D: 86 39        	stx	<L6+running_1+2
+   179                        ;        buffer[i--] = '0' + digit;
+   180 00:009F: A0 00 00     	ldy	#$0
+   181 00:00A2: A5 3B        	lda	<L6+i_1
+   182 00:00A4: 10 01        	bpl	L10
+   183 00:00A6: 88           	dey
+   184                        L10:
+   185 00:00A7: 85 01        	sta	<R0
+   186 00:00A9: 84 03        	sty	<R0+2
+   187 00:00AB: 18           	clc
+   188 00:00AC: 7B           	tdc
+   189 00:00AD: 69 0D 00     	adc	#<L6+buffer_1
+   190 00:00B0: 85 05        	sta	<R1
+   191 00:00B2: A9 00 00     	lda	#$0
+   192 00:00B5: 85 07        	sta	<R1+2
+   193 00:00B7: 18           	clc
+   194 00:00B8: A5 05        	lda	<R1
+   195 00:00BA: 65 01        	adc	<R0
+   196 00:00BC: 85 09        	sta	<R2
+   197 00:00BE: A5 07        	lda	<R1+2
+   198 00:00C0: 65 03        	adc	<R0+2
+   199 00:00C2: 85 0B        	sta	<R2+2
+   200 00:00C4: 18           	clc
+   201 00:00C5: A9 30 00     	lda	#$30
+   202 00:00C8: 65 35        	adc	<L6+digit_1
+   203 00:00CA: E2 20        	sep	#$20
+   204                        	longa	off
+   205 00:00CC: 87 09        	sta	[<R2]
+   206 00:00CE: C2 20        	rep	#$20
+   207                        	longa	on
+   208 00:00D0: C6 3B        	dec	<L6+i_1
+   209                        ;
+   210                        ;        if (running == 0) break;
+   211 00:00D2: A5 37        	lda	<L6+running_1
+   212 00:00D4: 05 39        	ora	<L6+running_1+2
+   213 00:00D6: D0 03        	bne	L11
+   214 00:00D8: 82 03 00     	brl	L10004
+   215                        L11:
+   216                        ;    }
+   217 00:00DB: 82 89 FF     	brl	L10003
+   218                        L10004:
+   219                        ;
+   220                        ;    if (is_negative) {
+   221 00:00DE: A5 3D        	lda	<L6+is_negative_1
+   222 00:00E0: D0 03        	bne	L12
+   223 00:00E2: 82 2F 00     	brl	L10005
+   224                        L12:
+   225                        ;        buffer[i--] = '-';
+   226 00:00E5: A0 00 00     	ldy	#$0
+  Tue Jun  8 2021 16:32                                                Page 5
+
+
+   227 00:00E8: A5 3B        	lda	<L6+i_1
+   228 00:00EA: 10 01        	bpl	L13
+   229 00:00EC: 88           	dey
+   230                        L13:
+   231 00:00ED: 85 01        	sta	<R0
+   232 00:00EF: 84 03        	sty	<R0+2
+   233 00:00F1: 18           	clc
+   234 00:00F2: 7B           	tdc
+   235 00:00F3: 69 0D 00     	adc	#<L6+buffer_1
+   236 00:00F6: 85 05        	sta	<R1
+   237 00:00F8: A9 00 00     	lda	#$0
+   238 00:00FB: 85 07        	sta	<R1+2
+   239 00:00FD: 18           	clc
+   240 00:00FE: A5 05        	lda	<R1
+   241 00:0100: 65 01        	adc	<R0
+   242 00:0102: 85 09        	sta	<R2
+   243 00:0104: A5 07        	lda	<R1+2
+   244 00:0106: 65 03        	adc	<R0+2
+   245 00:0108: 85 0B        	sta	<R2+2
+   246 00:010A: E2 20        	sep	#$20
+   247                        	longa	off
+   248 00:010C: A9 2D        	lda	#$2d
+   249 00:010E: 87 09        	sta	[<R2]
+   250 00:0110: C2 20        	rep	#$20
+   251                        	longa	on
+   252 00:0112: C6 3B        	dec	<L6+i_1
+   253                        ;    }
+   254                        ;
+   255                        ;    do {
+   256                        L10005:
+   257                        L10008:
+   258                        ;        *text = buffer[++i];
+   259 00:0114: E6 3B        	inc	<L6+i_1
+   260 00:0116: A0 00 00     	ldy	#$0
+   261 00:0119: A5 3B        	lda	<L6+i_1
+   262 00:011B: 10 01        	bpl	L14
+   263 00:011D: 88           	dey
+   264                        L14:
+   265 00:011E: 85 01        	sta	<R0
+   266 00:0120: 84 03        	sty	<R0+2
+   267 00:0122: 18           	clc
+   268 00:0123: 7B           	tdc
+   269 00:0124: 69 0D 00     	adc	#<L6+buffer_1
+   270 00:0127: 85 05        	sta	<R1
+   271 00:0129: A9 00 00     	lda	#$0
+   272 00:012C: 85 07        	sta	<R1+2
+   273 00:012E: 18           	clc
+   274 00:012F: A5 05        	lda	<R1
+   275 00:0131: 65 01        	adc	<R0
+   276 00:0133: 85 09        	sta	<R2
+   277 00:0135: A5 07        	lda	<R1+2
+   278 00:0137: 65 03        	adc	<R0+2
+   279 00:0139: 85 0B        	sta	<R2+2
+   280 00:013B: E2 20        	sep	#$20
+   281                        	longa	off
+   282 00:013D: A7 09        	lda	[<R2]
+   283 00:013F: 87 46        	sta	[<L5+text_0]
+   284 00:0141: C2 20        	rep	#$20
+  Tue Jun  8 2021 16:32                                                Page 6
+
+
+   285                        	longa	on
+   286                        ;        text++;
+   287 00:0143: E6 46        	inc	<L5+text_0
+   288 00:0145: D0 02        	bne	L15
+   289 00:0147: E6 48        	inc	<L5+text_0+2
+   290                        L15:
+   291                        ;    } while (i < 40);
+   292                        L10006:
+   293 00:0149: 38           	sec
+   294 00:014A: A5 3B        	lda	<L6+i_1
+   295 00:014C: E9 28 00     	sbc	#<$28
+   296 00:014F: 70 03        	bvs	L16
+   297 00:0151: 49 00 80     	eor	#$8000
+   298                        L16:
+   299 00:0154: 30 03        	bmi	L17
+   300 00:0156: 82 BB FF     	brl	L10008
+   301                        L17:
+   302                        L10007:
+   303                        ;}
+   304                        L18:
+   305 00:0159: A5 40        	lda	<L5+2
+   306 00:015B: 85 48        	sta	<L5+2+8
+   307 00:015D: A5 3F        	lda	<L5+1
+   308 00:015F: 85 47        	sta	<L5+1+8
+   309 00:0161: 2B           	pld
+   310 00:0162: 3B           	tsc
+   311 00:0163: 18           	clc
+   312 00:0164: 69 46 00     	adc	#L5+8
+   313 00:0167: 1B           	tcs
+   314 00:0168: 6B           	rtl
+   315             0000003E   L5	equ	62
+   316             0000000D   L6	equ	13
+   317                        	ends
+   318                        	efunc
+   319                        ;
+   320                        ;//
+   321                        ;// Initialize all the hardware on the Foenix
+   322                        ;//
+   323                        ;void fnx_init() {
+   324                        	code
+   325                        	xdef	~~fnx_init
+   326                        	func
+   327                        ~~fnx_init:
+   328                        	longa	on
+   329                        	longi	on
+   330 00:0169: 3B           	tsc
+   331 00:016A: 38           	sec
+   332 00:016B: E9 02 00     	sbc	#L19
+   333 00:016E: 1B           	tcs
+   334 00:016F: 0B           	phd
+   335 00:0170: 5B           	tcd
+   336                        ;    short res;
+   337                        ;
+   338                        ;    irq_init();
+   339             00000000   res_1	set	0
+   340 00:0171: 22 xx xx xx  	jsl	~~irq_init
+   341                        ;    txt_scr_init();
+   342 00:0175: 22 xx xx xx  	jsl	~~txt_scr_init
+  Tue Jun  8 2021 16:32                                                Page 7
+
+
+   343                        ;
+   344                        ;    TRACE("fnx_init");
+   345                        ;
+   346                        ;    clk_init();
+   347 00:0179: 22 xx xx xx  	jsl	~~clk_init
+   348                        ;    codec_init();
+   349 00:017D: 22 xx xx xx  	jsl	~~codec_init
+   350                        ;    psg_init();
+   351 00:0181: 22 xx xx xx  	jsl	~~psg_init
+   352                        ;    sid_init();
+   353 00:0185: 22 xx xx xx  	jsl	~~sid_init
+   354                        ;    bdev_init_system();
+   355 00:0189: 22 xx xx xx  	jsl	~~bdev_init_system
+   356                        ;
+   357                        ;    res = ps2_init();
+   358 00:018D: 22 xx xx xx  	jsl	~~ps2_init
+   359 00:0191: 85 01        	sta	<L20+res_1
+   360                        ;    if (res != 0) {
+   361 00:0193: A5 01        	lda	<L20+res_1
+   362 00:0195: D0 03        	bne	L21
+   363 00:0197: 82 1D 00     	brl	L10009
+   364                        L21:
+   365                        ;        k_prints("Could not initialize keyboard: 
+                    ");
+   366 00:019A: F4 xx xx     	pea	#^L1
+   367 00:019D: F4 xx xx     	pea	#<L1
+   368 00:01A0: 22 xx xx xx  	jsl	~~k_prints
+   369                        ;        txt_prhex_w(0, res);
+   370 00:01A4: D4 01        	pei	<L20+res_1
+   371 00:01A6: F4 00 00     	pea	#<$0
+   372 00:01A9: 22 xx xx xx  	jsl	~~txt_prhex_w
+   373                        ;        irq_disable(IRQ08_KBD);
+   374 00:01AD: F4 08 00     	pea	#<$8
+   375 00:01B0: 22 xx xx xx  	jsl	~~irq_disable
+   376                        ;
+   377                        ;        while (1) ;
+   378                        L10010:
+   379 00:01B4: 82 FD FF     	brl	L10010
+   380                        ;    }
+   381                        ;
+   382                        ;    res = con_install();
+   383                        L10009:
+   384 00:01B7: 22 xx xx xx  	jsl	~~con_install
+   385 00:01BB: 85 01        	sta	<L20+res_1
+   386                        ;    if (res != 0) {
+   387 00:01BD: A5 01        	lda	<L20+res_1
+   388 00:01BF: D0 03        	bne	L22
+   389 00:01C1: 82 16 00     	brl	L10012
+   390                        L22:
+   391                        ;        k_prints("Could not install the console d
                     river: ");
-   157 00:0087: F4 xx xx     	pea	#^L1+32
-   158 00:008A: F4 xx xx     	pea	#<L1+32
-   159 00:008D: 22 xx xx xx  	jsl	~~k_prints
-   160                        ;        txt_prhex_w(0, res);
-   161 00:0091: D4 01        	pei	<L6+res_1
-   162 00:0093: F4 00 00     	pea	#<$0
-   163 00:0096: 22 xx xx xx  	jsl	~~txt_prhex_w
-   164                        ;
-   165                        ;        while (1) ;
-   166                        L10005:
-  Sun Jun  6 2021 20:39                                                Page 4
+   392 00:01C4: F4 xx xx     	pea	#^L1+32
+   393 00:01C7: F4 xx xx     	pea	#<L1+32
+   394 00:01CA: 22 xx xx xx  	jsl	~~k_prints
+   395                        ;        txt_prhex_w(0, res);
+   396 00:01CE: D4 01        	pei	<L20+res_1
+   397 00:01D0: F4 00 00     	pea	#<$0
+   398 00:01D3: 22 xx xx xx  	jsl	~~txt_prhex_w
+  Tue Jun  8 2021 16:32                                                Page 8
 
 
-   167 00:009A: 82 FD FF     	brl	L10005
-   168                        ;    }
-   169                        ;
-   170                        ;    res = sdc_install();
-   171                        L10004:
-   172 00:009D: 22 xx xx xx  	jsl	~~sdc_install
-   173 00:00A1: 85 01        	sta	<L6+res_1
-   174                        ;    if (res != 0) {
-   175 00:00A3: A5 01        	lda	<L6+res_1
-   176 00:00A5: D0 03        	bne	L9
-   177 00:00A7: 82 16 00     	brl	L10007
-   178                        L9:
-   179                        ;        k_prints("Could not install the SDC drive
+   399                        ;
+   400                        ;        while (1) ;
+   401                        L10013:
+   402 00:01D7: 82 FD FF     	brl	L10013
+   403                        ;    }
+   404                        ;
+   405                        ;    res = sdc_install();
+   406                        L10012:
+   407 00:01DA: 22 xx xx xx  	jsl	~~sdc_install
+   408 00:01DE: 85 01        	sta	<L20+res_1
+   409                        ;    if (res != 0) {
+   410 00:01E0: A5 01        	lda	<L20+res_1
+   411 00:01E2: D0 03        	bne	L23
+   412 00:01E4: 82 16 00     	brl	L10015
+   413                        L23:
+   414                        ;        k_prints("Could not install the SDC drive
                     r: ");
-   180 00:00AA: F4 xx xx     	pea	#^L1+71
-   181 00:00AD: F4 xx xx     	pea	#<L1+71
-   182 00:00B0: 22 xx xx xx  	jsl	~~k_prints
-   183                        ;        txt_prhex_w(0, res);
-   184 00:00B4: D4 01        	pei	<L6+res_1
-   185 00:00B6: F4 00 00     	pea	#<$0
-   186 00:00B9: 22 xx xx xx  	jsl	~~txt_prhex_w
-   187                        ;
-   188                        ;        while (1) ;
-   189                        L10008:
-   190 00:00BD: 82 FD FF     	brl	L10008
-   191                        ;    }
-   192                        ;
-   193                        ;    res = cli_init();
-   194                        L10007:
-   195 00:00C0: 22 xx xx xx  	jsl	~~cli_init
-   196 00:00C4: 85 01        	sta	<L6+res_1
-   197                        ;    if (res != 0) {
-   198 00:00C6: A5 01        	lda	<L6+res_1
-   199 00:00C8: D0 03        	bne	L10
-   200 00:00CA: 82 16 00     	brl	L10010
-   201                        L10:
-   202                        ;        k_prints("Could not initilize the command
+   415 00:01E7: F4 xx xx     	pea	#^L1+71
+   416 00:01EA: F4 xx xx     	pea	#<L1+71
+   417 00:01ED: 22 xx xx xx  	jsl	~~k_prints
+   418                        ;        txt_prhex_w(0, res);
+   419 00:01F1: D4 01        	pei	<L20+res_1
+   420 00:01F3: F4 00 00     	pea	#<$0
+   421 00:01F6: 22 xx xx xx  	jsl	~~txt_prhex_w
+   422                        ;
+   423                        ;        while (1) ;
+   424                        L10016:
+   425 00:01FA: 82 FD FF     	brl	L10016
+   426                        ;    }
+   427                        ;
+   428                        ;    res = pata_install();
+   429                        L10015:
+   430 00:01FD: 22 xx xx xx  	jsl	~~pata_install
+   431 00:0201: 85 01        	sta	<L20+res_1
+   432                        ;    if (res != 0) {
+   433 00:0203: A5 01        	lda	<L20+res_1
+   434 00:0205: D0 03        	bne	L24
+   435 00:0207: 82 16 00     	brl	L10018
+   436                        L24:
+   437                        ;        k_prints("Could not install the HDD drive
+                    r: ");
+   438 00:020A: F4 xx xx     	pea	#^L1+106
+   439 00:020D: F4 xx xx     	pea	#<L1+106
+   440 00:0210: 22 xx xx xx  	jsl	~~k_prints
+   441                        ;        txt_prhex_w(0, res);
+   442 00:0214: D4 01        	pei	<L20+res_1
+   443 00:0216: F4 00 00     	pea	#<$0
+   444 00:0219: 22 xx xx xx  	jsl	~~txt_prhex_w
+   445                        ;
+   446                        ;        while (1) ;
+   447                        L10019:
+   448 00:021D: 82 FD FF     	brl	L10019
+   449                        ;    }
+   450                        ;
+   451                        ;    res = cli_init();
+   452                        L10018:
+   453 00:0220: 22 xx xx xx  	jsl	~~cli_init
+   454 00:0224: 85 01        	sta	<L20+res_1
+  Tue Jun  8 2021 16:32                                                Page 9
+
+
+   455                        ;    if (res != 0) {
+   456 00:0226: A5 01        	lda	<L20+res_1
+   457 00:0228: D0 03        	bne	L25
+   458 00:022A: 82 16 00     	brl	L10021
+   459                        L25:
+   460                        ;        k_prints("Could not initilize the command
                      line interface: ");
-   203 00:00CD: F4 xx xx     	pea	#^L1+106
-   204 00:00D0: F4 xx xx     	pea	#<L1+106
-   205 00:00D3: 22 xx xx xx  	jsl	~~k_prints
-   206                        ;        txt_prhex_w(0, res);
-   207 00:00D7: D4 01        	pei	<L6+res_1
-   208 00:00D9: F4 00 00     	pea	#<$0
-   209 00:00DC: 22 xx xx xx  	jsl	~~txt_prhex_w
-   210                        ;
-   211                        ;        while (1) ;
-   212                        L10011:
-   213 00:00E0: 82 FD FF     	brl	L10011
-   214                        ;    }   
-   215                        ;}
-   216                        L10010:
-   217                        L11:
-   218 00:00E3: 2B           	pld
-   219 00:00E4: 3B           	tsc
-   220 00:00E5: 18           	clc
-   221 00:00E6: 69 02 00     	adc	#L5
-   222 00:00E9: 1B           	tcs
-  Sun Jun  6 2021 20:39                                                Page 5
-
-
-   223 00:00EA: 6B           	rtl
-   224             00000002   L5	equ	2
-   225             00000001   L6	equ	1
-   226                        	ends
-   227                        	efunc
-   228                        	data
-   229                        L1:
-   230 00:0008: 43 6F 75 6C  	db	$43,$6F,$75,$6C,$64,$20,$6E,$6F,$74,$20,
+   461 00:022D: F4 xx xx     	pea	#^L1+141
+   462 00:0230: F4 xx xx     	pea	#<L1+141
+   463 00:0233: 22 xx xx xx  	jsl	~~k_prints
+   464                        ;        txt_prhex_w(0, res);
+   465 00:0237: D4 01        	pei	<L20+res_1
+   466 00:0239: F4 00 00     	pea	#<$0
+   467 00:023C: 22 xx xx xx  	jsl	~~txt_prhex_w
+   468                        ;
+   469                        ;        while (1) ;
+   470                        L10022:
+   471 00:0240: 82 FD FF     	brl	L10022
+   472                        ;    }   
+   473                        ;}
+   474                        L10021:
+   475                        L26:
+   476 00:0243: 2B           	pld
+   477 00:0244: 3B           	tsc
+   478 00:0245: 18           	clc
+   479 00:0246: 69 02 00     	adc	#L19
+   480 00:0249: 1B           	tcs
+   481 00:024A: 6B           	rtl
+   482             00000002   L19	equ	2
+   483             00000001   L20	equ	1
+   484                        	ends
+   485                        	efunc
+   486                        	data
+   487                        L1:
+   488 00:0008: 43 6F 75 6C  	db	$43,$6F,$75,$6C,$64,$20,$6E,$6F,$74,$20,
                     $69,$6E,$69,$74,$69
        00:000C: 64 20 6E 6F 
        00:0010: 74 20 69 6E 
        00:0014: 69 74 69 
-   231 00:0017: 61 6C 69 7A  	db	$61,$6C,$69,$7A,$65,$20,$6B,$65,$79,$62,
+   489 00:0017: 61 6C 69 7A  	db	$61,$6C,$69,$7A,$65,$20,$6B,$65,$79,$62,
                     $6F,$61,$72,$64,$3A
        00:001B: 65 20 6B 65 
        00:001F: 79 62 6F 61 
        00:0023: 72 64 3A 
-   232 00:0026: 20 00 43 6F  	db	$20,$00,$43,$6F,$75,$6C,$64,$20,$6E,$6F,
+   490 00:0026: 20 00 43 6F  	db	$20,$00,$43,$6F,$75,$6C,$64,$20,$6E,$6F,
                     $74,$20,$69,$6E,$73
        00:002A: 75 6C 64 20 
        00:002E: 6E 6F 74 20 
        00:0032: 69 6E 73 
-   233 00:0035: 74 61 6C 6C  	db	$74,$61,$6C,$6C,$20,$74,$68,$65,$20,$63,
+   491 00:0035: 74 61 6C 6C  	db	$74,$61,$6C,$6C,$20,$74,$68,$65,$20,$63,
                     $6F,$6E,$73,$6F,$6C
        00:0039: 20 74 68 65 
        00:003D: 20 63 6F 6E 
        00:0041: 73 6F 6C 
-   234 00:0044: 65 20 64 72  	db	$65,$20,$64,$72,$69,$76,$65,$72,$3A,$20,
+   492 00:0044: 65 20 64 72  	db	$65,$20,$64,$72,$69,$76,$65,$72,$3A,$20,
                     $00,$43,$6F,$75,$6C
        00:0048: 69 76 65 72 
        00:004C: 3A 20 00 43 
+  Tue Jun  8 2021 16:32                                                Page 10
+
+
        00:0050: 6F 75 6C 
-   235 00:0053: 64 20 6E 6F  	db	$64,$20,$6E,$6F,$74,$20,$69,$6E,$73,$74,
+   493 00:0053: 64 20 6E 6F  	db	$64,$20,$6E,$6F,$74,$20,$69,$6E,$73,$74,
                     $61,$6C,$6C,$20,$74
        00:0057: 74 20 69 6E 
        00:005B: 73 74 61 6C 
        00:005F: 6C 20 74 
-   236 00:0062: 68 65 20 53  	db	$68,$65,$20,$53,$44,$43,$20,$64,$72,$69,
+   494 00:0062: 68 65 20 53  	db	$68,$65,$20,$53,$44,$43,$20,$64,$72,$69,
                     $76,$65,$72,$3A,$20
        00:0066: 44 43 20 64 
        00:006A: 72 69 76 65 
        00:006E: 72 3A 20 
-   237 00:0071: 00 43 6F 75  	db	$00,$43,$6F,$75,$6C,$64,$20,$6E,$6F,$74,
-                    $20,$69,$6E,$69,$74
+   495 00:0071: 00 43 6F 75  	db	$00,$43,$6F,$75,$6C,$64,$20,$6E,$6F,$74,
+                    $20,$69,$6E,$73,$74
        00:0075: 6C 64 20 6E 
        00:0079: 6F 74 20 69 
-       00:007D: 6E 69 74 
-   238 00:0080: 69 6C 69 7A  	db	$69,$6C,$69,$7A,$65,$20,$74,$68,$65,$20,
-                    $63,$6F,$6D,$6D,$61
-       00:0084: 65 20 74 68 
-       00:0088: 65 20 63 6F 
-       00:008C: 6D 6D 61 
-   239 00:008F: 6E 64 20 6C  	db	$6E,$64,$20,$6C,$69,$6E,$65,$20,$69,$6E,
-                    $74,$65,$72,$66,$61
-       00:0093: 69 6E 65 20 
-       00:0097: 69 6E 74 65 
-       00:009B: 72 66 61 
-   240 00:009E: 63 65 3A 20  	db	$63,$65,$3A,$20,$00
-  Sun Jun  6 2021 20:39                                                Page 6
+       00:007D: 6E 73 74 
+   496 00:0080: 61 6C 6C 20  	db	$61,$6C,$6C,$20,$74,$68,$65,$20,$48,$44,
+                    $44,$20,$64,$72,$69
+       00:0084: 74 68 65 20 
+       00:0088: 48 44 44 20 
+       00:008C: 64 72 69 
+   497 00:008F: 76 65 72 3A  	db	$76,$65,$72,$3A,$20,$00,$43,$6F,$75,$6C,
+                    $64,$20,$6E,$6F,$74
+       00:0093: 20 00 43 6F 
+       00:0097: 75 6C 64 20 
+       00:009B: 6E 6F 74 
+   498 00:009E: 20 69 6E 69  	db	$20,$69,$6E,$69,$74,$69,$6C,$69,$7A,$65,
+                    $20,$74,$68,$65,$20
+       00:00A2: 74 69 6C 69 
+       00:00A6: 7A 65 20 74 
+       00:00AA: 68 65 20 
+   499 00:00AD: 63 6F 6D 6D  	db	$63,$6F,$6D,$6D,$61,$6E,$64,$20,$6C,$69,
+                    $6E,$65,$20,$69,$6E
+       00:00B1: 61 6E 64 20 
+       00:00B5: 6C 69 6E 65 
+       00:00B9: 20 69 6E 
+   500 00:00BC: 74 65 72 66  	db	$74,$65,$72,$66,$61,$63,$65,$3A,$20,$00
+       00:00C0: 61 63 65 3A 
+       00:00C4: 20 00 
+   501 00:00C6:              	ends
+   502                        ;
+   503                        ;void display_pata() {
+   504                        	code
+   505                        	xdef	~~display_pata
+   506                        	func
+   507                        ~~display_pata:
+   508                        	longa	on
+   509                        	longi	on
+   510 00:024B: 3B           	tsc
+   511 00:024C: 38           	sec
+   512 00:024D: E9 64 00     	sbc	#L28
+   513 00:0250: 1B           	tcs
+   514 00:0251: 0B           	phd
+   515 00:0252: 5B           	tcd
+   516                        ;    char buffer[20];
+   517                        ;    t_drive_info di;
+   518                        ;    short res;
+   519                        ;
+  Tue Jun  8 2021 16:32                                                Page 11
 
 
-       00:00A2: 00 
-   241 00:00A3:              	ends
-   242                        ;
-   243                        ;int main(int argc, char * argv[]) {
-   244                        	code
-   245                        	xdef	~~main
-   246                        	func
-   247                        ~~main:
-   248                        	longa	on
-   249                        	longi	on
-   250 00:00EB: 3B           	tsc
-   251 00:00EC: 38           	sec
-   252 00:00ED: E9 04 00     	sbc	#L13
-   253 00:00F0: 1B           	tcs
-   254 00:00F1: 0B           	phd
-   255 00:00F2: 5B           	tcd
-   256             00000004   argc_0	set	4
-   257             00000006   argv_0	set	6
-   258                        ;    short res;
-   259                        ;    FRESULT f_result;
-   260                        ;
-   261                        ;    fnx_init();
-   262             00000000   res_1	set	0
-   263             00000002   f_result_1	set	2
-   264 00:00F3: 22 xx xx xx  	jsl	~~fnx_init
-   265                        ;
-   266                        ;    k_prints("Foenix GenX Portable Kernel v00.00.
+   520                        ;    res = bdev_ioctrl(BDEV_HDC, PATA_GET_DRIVE_IN
+                    FO, (byte *)&di, sizeof(t_drive_info));
+   521             00000000   buffer_1	set	0
+   522             00000014   di_1	set	20
+   523             0000005A   res_1	set	90
+   524 00:0253: F4 46 00     	pea	#<$46
+   525 00:0256: F4 00 00     	pea	#0
+   526 00:0259: 18           	clc
+   527 00:025A: 7B           	tdc
+   528 00:025B: 69 1D 00     	adc	#<L29+di_1
+   529 00:025E: 48           	pha
+   530 00:025F: F4 04 00     	pea	#<$4
+   531 00:0262: F4 02 00     	pea	#<$2
+   532 00:0265: 22 xx xx xx  	jsl	~~bdev_ioctrl
+   533 00:0269: 85 63        	sta	<L29+res_1
+   534                        ;    if (res) {
+   535 00:026B: A5 63        	lda	<L29+res_1
+   536 00:026D: D0 03        	bne	L30
+   537 00:026F: 82 0D 00     	brl	L10024
+   538                        L30:
+   539                        ;        k_prints("Could not get HDD information.\
+                    r");
+   540 00:0272: F4 xx xx     	pea	#^L27
+   541 00:0275: F4 xx xx     	pea	#<L27
+   542 00:0278: 22 xx xx xx  	jsl	~~k_prints
+   543                        ;    } else {
+   544 00:027C: 82 98 00     	brl	L10025
+   545                        L10024:
+   546                        ;        k_prints("Installed PATA Hard Drive:\rMod
+                    el: ");
+   547 00:027F: F4 xx xx     	pea	#^L27+32
+   548 00:0282: F4 xx xx     	pea	#<L27+32
+   549 00:0285: 22 xx xx xx  	jsl	~~k_prints
+   550                        ;        chan_write(0, di.model_name, sizeof(di.mo
+                    del_name));
+   551 00:0289: F4 26 00     	pea	#<$26
+   552 00:028C: F4 00 00     	pea	#0
+   553 00:028F: 18           	clc
+   554 00:0290: 7B           	tdc
+   555 00:0291: 69 37 00     	adc	#<L29+di_1+26
+   556 00:0294: 48           	pha
+   557 00:0295: F4 00 00     	pea	#<$0
+   558 00:0298: 22 xx xx xx  	jsl	~~chan_write
+   559                        ;        
+   560                        ;        k_prints("\rVersion: ");
+   561 00:029C: F4 xx xx     	pea	#^L27+67
+   562 00:029F: F4 xx xx     	pea	#<L27+67
+   563 00:02A2: 22 xx xx xx  	jsl	~~k_prints
+   564                        ;        chan_write(0, di.firmware_version, sizeof
+                    (di.firmware_version));
+   565 00:02A6: F4 06 00     	pea	#<$6
+   566 00:02A9: F4 00 00     	pea	#0
+   567 00:02AC: 18           	clc
+   568 00:02AD: 7B           	tdc
+   569 00:02AE: 69 31 00     	adc	#<L29+di_1+20
+   570 00:02B1: 48           	pha
+   571 00:02B2: F4 00 00     	pea	#<$0
+   572 00:02B5: 22 xx xx xx  	jsl	~~chan_write
+  Tue Jun  8 2021 16:32                                                Page 12
+
+
+   573                        ;        
+   574                        ;        k_prints("\rSerial Number: ");
+   575 00:02B9: F4 xx xx     	pea	#^L27+78
+   576 00:02BC: F4 xx xx     	pea	#<L27+78
+   577 00:02BF: 22 xx xx xx  	jsl	~~k_prints
+   578                        ;        chan_write(0, di.serial_number, sizeof(di
+                    .serial_number));
+   579 00:02C3: F4 12 00     	pea	#<$12
+   580 00:02C6: F4 00 00     	pea	#0
+   581 00:02C9: 18           	clc
+   582 00:02CA: 7B           	tdc
+   583 00:02CB: 69 1F 00     	adc	#<L29+di_1+2
+   584 00:02CE: 48           	pha
+   585 00:02CF: F4 00 00     	pea	#<$0
+   586 00:02D2: 22 xx xx xx  	jsl	~~chan_write
+   587                        ;
+   588                        ;        k_prints("\rDefault LBA: ");
+   589 00:02D6: F4 xx xx     	pea	#^L27+95
+   590 00:02D9: F4 xx xx     	pea	#<L27+95
+   591 00:02DC: 22 xx xx xx  	jsl	~~k_prints
+   592                        ;        // ltoa(di.default_lba, buffer);
+   593                        ;        // chan_write(0, buffer, sizeof(buffer));
+   594                        ;        txt_prhex_w(0, ((di.l.lba_default >> 16) 
+                    & 0xffff));
+   595 00:02E0: D4 61        	pei	<L29+di_1+68
+   596 00:02E2: D4 5F        	pei	<L29+di_1+66
+   597 00:02E4: A9 10 00     	lda	#$10
+   598                        	xref	~~~llsr
+   599 00:02E7: 22 xx xx xx  	jsl	~~~llsr
+   600 00:02EB: 85 01        	sta	<R0
+   601 00:02ED: 86 03        	stx	<R0+2
+   602 00:02EF: A5 01        	lda	<R0
+   603 00:02F1: 85 05        	sta	<R1
+   604 00:02F3: 64 07        	stz	<R1+2
+   605 00:02F5: D4 05        	pei	<R1
+   606 00:02F7: F4 00 00     	pea	#<$0
+   607 00:02FA: 22 xx xx xx  	jsl	~~txt_prhex_w
+   608                        ;        txt_prhex_w(0, (di.l.lba_default) & 0xfff
+                    f);
+   609 00:02FE: A5 5F        	lda	<L29+di_1+66
+   610 00:0300: 85 01        	sta	<R0
+   611 00:0302: 64 03        	stz	<R0+2
+   612 00:0304: D4 01        	pei	<R0
+   613 00:0306: F4 00 00     	pea	#<$0
+   614 00:0309: 22 xx xx xx  	jsl	~~txt_prhex_w
+   615                        ;
+   616                        ;        k_prints("\r\r");
+   617 00:030D: F4 xx xx     	pea	#^L27+110
+   618 00:0310: F4 xx xx     	pea	#<L27+110
+   619 00:0313: 22 xx xx xx  	jsl	~~k_prints
+   620                        ;    }
+   621                        L10025:
+   622                        ;}
+   623                        L31:
+   624 00:0317: 2B           	pld
+   625 00:0318: 3B           	tsc
+   626 00:0319: 18           	clc
+   627 00:031A: 69 64 00     	adc	#L28
+  Tue Jun  8 2021 16:32                                                Page 13
+
+
+   628 00:031D: 1B           	tcs
+   629 00:031E: 6B           	rtl
+   630             00000064   L28	equ	100
+   631             00000009   L29	equ	9
+   632                        	ends
+   633                        	efunc
+   634                        	data
+   635                        L27:
+   636 00:00C6: 43 6F 75 6C  	db	$43,$6F,$75,$6C,$64,$20,$6E,$6F,$74,$20,
+                    $67,$65,$74,$20,$48
+       00:00CA: 64 20 6E 6F 
+       00:00CE: 74 20 67 65 
+       00:00D2: 74 20 48 
+   637 00:00D5: 44 44 20 69  	db	$44,$44,$20,$69,$6E,$66,$6F,$72,$6D,$61,
+                    $74,$69,$6F,$6E,$2E
+       00:00D9: 6E 66 6F 72 
+       00:00DD: 6D 61 74 69 
+       00:00E1: 6F 6E 2E 
+   638 00:00E4: 0D 00 49 6E  	db	$0D,$00,$49,$6E,$73,$74,$61,$6C,$6C,$65,
+                    $64,$20,$50,$41,$54
+       00:00E8: 73 74 61 6C 
+       00:00EC: 6C 65 64 20 
+       00:00F0: 50 41 54 
+   639 00:00F3: 41 20 48 61  	db	$41,$20,$48,$61,$72,$64,$20,$44,$72,$69,
+                    $76,$65,$3A,$0D,$4D
+       00:00F7: 72 64 20 44 
+       00:00FB: 72 69 76 65 
+       00:00FF: 3A 0D 4D 
+   640 00:0102: 6F 64 65 6C  	db	$6F,$64,$65,$6C,$3A,$20,$00,$0D,$56,$65,
+                    $72,$73,$69,$6F,$6E
+       00:0106: 3A 20 00 0D 
+       00:010A: 56 65 72 73 
+       00:010E: 69 6F 6E 
+   641 00:0111: 3A 20 00 0D  	db	$3A,$20,$00,$0D,$53,$65,$72,$69,$61,$6C,
+                    $20,$4E,$75,$6D,$62
+       00:0115: 53 65 72 69 
+       00:0119: 61 6C 20 4E 
+       00:011D: 75 6D 62 
+   642 00:0120: 65 72 3A 20  	db	$65,$72,$3A,$20,$00,$0D,$44,$65,$66,$61,
+                    $75,$6C,$74,$20,$4C
+       00:0124: 00 0D 44 65 
+       00:0128: 66 61 75 6C 
+       00:012C: 74 20 4C 
+   643 00:012F: 42 41 3A 20  	db	$42,$41,$3A,$20,$00,$0D,$0D,$00
+       00:0133: 00 0D 0D 00 
+   644 00:0137:              	ends
+   645                        ;
+   646                        ;int main(int argc, char * argv[]) {
+   647                        	code
+   648                        	xdef	~~main
+   649                        	func
+   650                        ~~main:
+   651                        	longa	on
+   652                        	longi	on
+   653 00:031F: 3B           	tsc
+   654 00:0320: 38           	sec
+   655 00:0321: E9 04 00     	sbc	#L33
+   656 00:0324: 1B           	tcs
+  Tue Jun  8 2021 16:32                                                Page 14
+
+
+   657 00:0325: 0B           	phd
+   658 00:0326: 5B           	tcd
+   659             00000004   argc_0	set	4
+   660             00000006   argv_0	set	6
+   661                        ;    short res;
+   662                        ;    FRESULT f_result;
+   663                        ;
+   664                        ;    fnx_init();
+   665             00000000   res_1	set	0
+   666             00000002   f_result_1	set	2
+   667 00:0327: 22 xx xx xx  	jsl	~~fnx_init
+   668                        ;
+   669                        ;    k_prints("Foenix GenX Portable Kernel v00.00.
                     00\r");
-   267 00:00F7: F4 xx xx     	pea	#^L12
-   268 00:00FA: F4 xx xx     	pea	#<L12
-   269 00:00FD: 22 xx xx xx  	jsl	~~k_prints
-   270                        ;
-   271                        ;    k_prints("OK\r");
-   272 00:0101: F4 xx xx     	pea	#^L12+39
-   273 00:0104: F4 xx xx     	pea	#<L12+39
-   274 00:0107: 22 xx xx xx  	jsl	~~k_prints
-   275                        ;    
-   276                        ;    while (1) {
-   277                        L10013:
-   278                        ;        cli_repl();
-   279 00:010B: 22 xx xx xx  	jsl	~~cli_repl
-   280                        ;    }
-   281 00:010F: 82 F9 FF     	brl	L10013
-   282                        ;}
-   283             00000004   L13	equ	4
-   284             00000001   L14	equ	1
-   285                        	ends
-   286                        	efunc
-   287                        	data
-   288                        L12:
-   289 00:00A3: 46 6F 65 6E  	db	$46,$6F,$65,$6E,$69,$78,$20,$47,$65,$6E,
+   670 00:032B: F4 xx xx     	pea	#^L32
+   671 00:032E: F4 xx xx     	pea	#<L32
+   672 00:0331: 22 xx xx xx  	jsl	~~k_prints
+   673                        ;
+   674                        ;    display_pata();
+   675 00:0335: 22 xx xx xx  	jsl	~~display_pata
+   676                        ;
+   677                        ;    k_prints("OK\r");
+   678 00:0339: F4 xx xx     	pea	#^L32+39
+   679 00:033C: F4 xx xx     	pea	#<L32+39
+   680 00:033F: 22 xx xx xx  	jsl	~~k_prints
+   681                        ;    
+   682                        ;    while (1) {
+   683                        L10026:
+   684                        ;        cli_repl();
+   685 00:0343: 22 xx xx xx  	jsl	~~cli_repl
+   686                        ;    }
+   687 00:0347: 82 F9 FF     	brl	L10026
+   688                        ;}
+   689             00000004   L33	equ	4
+   690             00000001   L34	equ	1
+   691                        	ends
+   692                        	efunc
+   693                        	data
+   694                        L32:
+   695 00:0137: 46 6F 65 6E  	db	$46,$6F,$65,$6E,$69,$78,$20,$47,$65,$6E,
                     $58,$20,$50,$6F,$72
-       00:00A7: 69 78 20 47 
-       00:00AB: 65 6E 58 20 
-       00:00AF: 50 6F 72 
-   290 00:00B2: 74 61 62 6C  	db	$74,$61,$62,$6C,$65,$20,$4B,$65,$72,$6E,
+       00:013B: 69 78 20 47 
+       00:013F: 65 6E 58 20 
+       00:0143: 50 6F 72 
+   696 00:0146: 74 61 62 6C  	db	$74,$61,$62,$6C,$65,$20,$4B,$65,$72,$6E,
                     $65,$6C,$20,$76,$30
-       00:00B6: 65 20 4B 65 
-  Sun Jun  6 2021 20:39                                                Page 7
-
-
-       00:00BA: 72 6E 65 6C 
-       00:00BE: 20 76 30 
-   291 00:00C1: 30 2E 30 30  	db	$30,$2E,$30,$30,$2E,$30,$30,$0D,$00,$4F,
+       00:014A: 65 20 4B 65 
+       00:014E: 72 6E 65 6C 
+       00:0152: 20 76 30 
+   697 00:0155: 30 2E 30 30  	db	$30,$2E,$30,$30,$2E,$30,$30,$0D,$00,$4F,
                     $4B,$0D,$00
-       00:00C5: 2E 30 30 0D 
-       00:00C9: 00 4F 4B 0D 
-       00:00CD: 00 
-   292 00:00CE:              	ends
-   293                        ;
-   294                        	xref	~~con_install
-   295                        	xref	~~codec_init
-   296                        	xref	~~cli_repl
-   297                        	xref	~~cli_init
-   298                        	xref	~~sdc_install
-   299                        	xref	~~bdev_init_system
-   300                        	xref	~~ps2_init
-   301                        	xref	~~txt_prhex_w
-   302                        	xref	~~txt_scr_init
-   303                        	xref	~~chan_write
-   304                        	xref	~~sid_init
-   305                        	xref	~~psg_init
-   306                        	xref	~~clk_init
-   307                        	xref	~~irq_disable
-   308                        	xref	~~irq_init
-   309                        	xref	~~strlen
-   310                        	end
+       00:0159: 2E 30 30 0D 
+       00:015D: 00 4F 4B 0D 
+       00:0161: 00 
+   698 00:0162:              	ends
+   699                        ;
+   700                        	xref	~~con_install
+   701                        	xref	~~codec_init
+  Tue Jun  8 2021 16:32                                                Page 15
 
 
-      Lines assembled: 310
+   702                        	xref	~~cli_repl
+   703                        	xref	~~cli_init
+   704                        	xref	~~pata_install
+   705                        	xref	~~sdc_install
+   706                        	xref	~~bdev_ioctrl
+   707                        	xref	~~bdev_init_system
+   708                        	xref	~~ps2_init
+   709                        	xref	~~txt_prhex_w
+   710                        	xref	~~txt_scr_init
+   711                        	xref	~~chan_write
+   712                        	xref	~~sid_init
+   713                        	xref	~~psg_init
+   714                        	xref	~~clk_init
+   715                        	xref	~~irq_disable
+   716                        	xref	~~irq_init
+   717                        	xref	~~strlen
+   718                        	end
+
+
+      Lines assembled: 718
       Errors: 0
